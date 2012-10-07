@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project name="Fancy File Server" default="help">
+	<property name="app.version" value="1.1"/>
+	<property name="app.httpcore.version" value="4.0.1"/>
+	<property name="app.swt.version" value="3.6"/>
+    <target name="help">
+    </target>
+    <target name="compile" description="Compile code">
+        <javac srcdir="src" destdir="bin"/>
+    </target>
+    <target name="create_jars" depends="create_jar_linux,create_jar_windows,create_jar_macosx">
+        <description>
+            Create Runnable Jars for all supported systems with Jar-in-Jar Loader
+        </description>
+    </target>
+    <target name="create_jar_linux">
+        <jar destfile="build/linux/fancy-file-server-${app.version}.jar">
+            <manifest>
+                <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
+                <attribute name="Rsrc-Main-Class" value="eu.knapsu.FancyFileServer"/>
+                <attribute name="Class-Path" value="."/>
+                <attribute name="Rsrc-Class-Path" value="./ httpcore-${app.httpcore.version}.jar swt-${app.swt.version}-linux.jar"/>
+            </manifest>
+            <zipfileset src="build/jar-in-jar-loader.zip"/>
+            <fileset dir="bin"/>
+            <zipfileset dir="lib" includes="httpcore-${app.httpcore.version}.jar"/>
+            <zipfileset dir="lib" includes="swt-${app.swt.version}-linux.jar"/>
+            <fileset file="version.txt" />
+            <fileset file="license.txt" />
+        </jar>
+    </target>
+    <target name="create_jar_windows">
+        <jar destfile="build/windows/fancy-file-server-${app.version}.jar">
+            <manifest>
+                <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
+                <attribute name="Rsrc-Main-Class" value="eu.knapsu.FancyFileServer"/>
+                <attribute name="Class-Path" value="."/>
+                <attribute name="Rsrc-Class-Path" value="./ httpcore-${app.httpcore.version}.jar swt-${app.swt.version}-windows.jar"/>
+            </manifest>
+            <zipfileset src="build/jar-in-jar-loader.zip"/>
+            <fileset dir="bin"/>
+            <zipfileset dir="lib" includes="httpcore-${app.httpcore.version}.jar"/>
+            <zipfileset dir="lib" includes="swt-${app.swt.version}-windows.jar"/>
+            <fileset file="version.txt" />
+            <fileset file="license.txt" />
+        </jar>
+    </target>
+    <target name="create_jar_macosx">
+        <jar destfile="build/macosx/fancy-file-server-${app.version}.jar">
+            <manifest>
+                <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
+                <attribute name="Rsrc-Main-Class" value="eu.knapsu.FancyFileServer"/>
+                <attribute name="Class-Path" value="."/>
+                <attribute name="Rsrc-Class-Path" value="./ httpcore-${app.httpcore.version}.jar swt-${app.swt.version}-macosx.jar"/>
+            </manifest>
+            <zipfileset src="build/jar-in-jar-loader.zip"/>
+            <fileset dir="bin"/>
+            <zipfileset dir="lib" includes="httpcore-${app.httpcore.version}.jar"/>
+            <zipfileset dir="lib" includes="swt-${app.swt.version}-macosx.jar"/>
+            <fileset file="version.txt" />
+            <fileset file="license.txt" />
+        </jar>
+    </target>
+</project>
