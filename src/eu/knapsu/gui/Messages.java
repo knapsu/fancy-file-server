@@ -6,6 +6,7 @@ public class Messages {
 
 	private static HashMap<Locale, ResourceBundle> resources = new HashMap<Locale, ResourceBundle>();
 
+
 	public static String getString(String key, Locale locale) {
 		if (locale == null) {
 			locale = Locale.getDefault();
