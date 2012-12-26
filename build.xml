@@ -1,64 +1,144 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project name="Fancy File Server" default="help">
-	<property name="app.version" value="1.1"/>
-	<property name="app.httpcore.version" value="4.0.1"/>
-	<property name="app.swt.version" value="3.6"/>
-    <target name="help">
-    </target>
-    <target name="compile" description="Compile code">
-        <javac srcdir="src" destdir="bin"/>
-    </target>
-    <target name="create_jars" depends="create_jar_linux,create_jar_windows,create_jar_macosx">
-        <description>
-            Create Runnable Jars for all supported systems with Jar-in-Jar Loader
-        </description>
-    </target>
-    <target name="create_jar_linux">
-        <jar destfile="build/linux/fancy-file-server-${app.version}.jar">
-            <manifest>
-                <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
-                <attribute name="Rsrc-Main-Class" value="eu.knapsu.FancyFileServer"/>
-                <attribute name="Class-Path" value="."/>
-                <attribute name="Rsrc-Class-Path" value="./ httpcore-${app.httpcore.version}.jar swt-${app.swt.version}-linux.jar"/>
-            </manifest>
-            <zipfileset src="build/jar-in-jar-loader.zip"/>
-            <fileset dir="bin"/>
-            <zipfileset dir="lib" includes="httpcore-${app.httpcore.version}.jar"/>
-            <zipfileset dir="lib" includes="swt-${app.swt.version}-linux.jar"/>
-            <fileset file="version.txt" />
-            <fileset file="license.txt" />
-        </jar>
-    </target>
-    <target name="create_jar_windows">
-        <jar destfile="build/windows/fancy-file-server-${app.version}.jar">
-            <manifest>
-                <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
-                <attribute name="Rsrc-Main-Class" value="eu.knapsu.FancyFileServer"/>
-                <attribute name="Class-Path" value="."/>
-                <attribute name="Rsrc-Class-Path" value="./ httpcore-${app.httpcore.version}.jar swt-${app.swt.version}-windows.jar"/>
-            </manifest>
-            <zipfileset src="build/jar-in-jar-loader.zip"/>
-            <fileset dir="bin"/>
-            <zipfileset dir="lib" includes="httpcore-${app.httpcore.version}.jar"/>
-            <zipfileset dir="lib" includes="swt-${app.swt.version}-windows.jar"/>
-            <fileset file="version.txt" />
-            <fileset file="license.txt" />
-        </jar>
-    </target>
-    <target name="create_jar_macosx">
-        <jar destfile="build/macosx/fancy-file-server-${app.version}.jar">
-            <manifest>
-                <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
-                <attribute name="Rsrc-Main-Class" value="eu.knapsu.FancyFileServer"/>
-                <attribute name="Class-Path" value="."/>
-                <attribute name="Rsrc-Class-Path" value="./ httpcore-${app.httpcore.version}.jar swt-${app.swt.version}-macosx.jar"/>
-            </manifest>
-            <zipfileset src="build/jar-in-jar-loader.zip"/>
-            <fileset dir="bin"/>
-            <zipfileset dir="lib" includes="httpcore-${app.httpcore.version}.jar"/>
-            <zipfileset dir="lib" includes="swt-${app.swt.version}-macosx.jar"/>
-            <fileset file="version.txt" />
-            <fileset file="license.txt" />
-        </jar>
-    </target>
+<project name="Fancy File Server">
+
+	<loadfile property="app.version" srcfile="version.txt" />
+	<property name="app.httpcore.version" value="4.2.2" />
+	<property name="app.swt.version" value="3.7.2" />
+
+	<loadproperties srcfile="build.properties" />
+
+	<target name="clean">
+		<delete dir="target" />
+	</target>
+
+	<target name="compile">
+		<description>Compile sources</description>
+		<mkdir dir="target/classes" />
+		<javac srcdir="src" destdir="target/classes" source="1.6" target="1.6" includeantruntime="false">
+			<classpath>
+				<fileset dir="lib" />
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<description>Create runnable JAR with Jar-in-Jar Loader</description>
+		<jar destfile="target/jars/fancy-file-server-${app.version}-${system}${arch}.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
+				<attribute name="Rsrc-Main-Class" value="eu.knapsu.FancyFileServer" />
+				<attribute name="Class-Path" value="." />
+				<attribute name="Rsrc-Class-Path" value="./ httpcore-${app.httpcore.version}.jar swt-${app.swt.version}-${system}${arch}.jar" />
+				<attribute name="App-Name" value="${ant.project.name}" />
+				<attribute name="App-Version" value="${app.version}" />
+				<attribute name="App-License" value="GNU General Public License" />
+			</manifest>
+			<zipfileset src="res/jar-in-jar-loader.zip" />
+			<fileset dir="target/classes" />
+			<fileset dir="src" excludes="**/*.java" />
+			<zipfileset dir="lib" includes="httpcore-${app.httpcore.version}.jar" />
+			<zipfileset dir="lib" includes="swt-${app.swt.version}-${system}${arch}.jar" />
+			<fileset file="version.txt" />
+			<fileset file="license.txt" />
+		</jar>
+	</target>
+
+	<target name="jar-linux">
+		<antcall target="jar">
+			<param name="system" value="linux" />
+			<param name="arch" value="" />
+		</antcall>
+	</target>
+
+	<target name="jar-macosx">
+		<antcall target="jar">
+			<param name="system" value="macosx" />
+			<param name="arch" value="" />
+		</antcall>
+	</target>
+
+	<target name="jar-windows">
+		<antcall target="jar">
+			<param name="system" value="windows" />
+			<param name="arch" value="" />
+		</antcall>
+	</target>
+
+	<target name="jar-all">
+		<description>Create Runnable JARs for all supported systems</description>
+		<antcall>
+			<target name="jar-linux" />
+			<target name="jar-macosx" />
+			<target name="jar-windows" />
+		</antcall>
+	</target>
+
+	<target name="build-linux">
+		<antcall target="package-linux">
+			<param name="platform" value="32bit" />
+		</antcall>
+	</target>
+
+	<target name="package-linux" depends="jar-linux">
+		<copy todir="target/linux/${platform}">
+			<fileset dir="res/linux" />
+		</copy>
+		<copy file="target/jars/fancy-file-server-${app.version}-linux.jar" tofile="target/linux/${platform}/fancy-file-server.jar" />
+		<zip destfile="target/Fancy_File_Server_${app.version}_Linux_${platform}.zip" whenempty="fail">
+			<zipfileset dir="target/linux/${platform}">
+				<exclude name="**/*.sh" />
+			</zipfileset>
+			<zipfileset dir="target/linux/${platform}" filemode="755">
+				<include name="**/*.sh" />
+			</zipfileset>
+		</zip>
+	</target>
+
+	<target name="build-macosx">
+		<antcall target="package-macosx">
+			<param name="platform" value="32bit" />
+		</antcall>
+	</target>
+
+	<target name="package-macosx" depends="jar-macosx">
+		<copy todir="target/macosx/${platform}">
+			<fileset dir="res/macosx" />
+		</copy>
+		<property name="macosx.content" value="Fancy File Server.app/Contents/MacOS" />
+		<copy file="target/jars/fancy-file-server-${app.version}-macosx.jar" tofile="target/macosx/${platform}/${macosx.content}/fancy-file-server.jar" />
+		<zip destfile="target/Fancy_File_Server_${app.version}_Mac_${platform}.zip" whenempty="fail">
+			<zipfileset dir="target/macosx/${platform}">
+				<exclude name="${macosx.content}/fancy-file-server" />
+			</zipfileset>
+			<zipfileset dir="target/macosx/${platform}" filemode="755">
+				<include name="${macosx.content}/fancy-file-server" />
+			</zipfileset>
+		</zip>
+	</target>
+
+	<target name="build-windows" depends="jar-windows">
+		<mkdir dir="target/windows/32bit" />
+		<launch4j configFile="res/windows/launch4j.xml" jar="target/jars/fancy-file-server-${app.version}-windows.jar" outfile="target/windows/32bit/Fancy File Server.exe" />
+		<antcall target="package-windows">
+			<param name="platform" value="32bit" />
+		</antcall>
+	</target>
+
+	<target name="package-windows">
+		<zip destfile="target/Fancy_File_Server_${app.version}_Windows_${platform}.zip" whenempty="fail">
+			<zipfileset dir="target/windows/${platform}" />
+		</zip>
+	</target>
+
+	<target name="build-all">
+		<description>Build packages for all supported systems</description>
+		<antcall>
+			<target name="build-linux" />
+			<target name="build-macosx" />
+			<target name="build-windows" />
+		</antcall>
+	</target>
+
+	<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpath="${launch4j.dir}/launch4j.jar:${launch4j.dir}/lib/xstream.jar" />
+
 </project>
