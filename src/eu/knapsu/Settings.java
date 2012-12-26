@@ -13,19 +13,18 @@ public class Settings {
 
 	static {
 		properties = new Properties();
-		String osName = System.getProperty("os.name");
 
-		if (osName.startsWith("Windows")) {
-			settingsDirectory = new File(System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH"), "fancy_file_server");
-		} else if (osName.startsWith("Mac OS X")) {
-			settingsDirectory = new File(System.getenv("HOME"), "fancy_file_server");
-		} else if (osName.startsWith("Linux")) {
-			settingsDirectory = new File(System.getProperty("user.home"), ".config/fancy-file-server");
+		if (isWindows()) {
+			settingsDirectory = new File(System.getenv("APPDATA") + "\\Fancy File Server");
+		} else if (isOSX()) {
+			settingsDirectory = new File(System.getProperty("user.home")+ "/Library/Application Support/Fancy File Server");
+		} else if (isLinux()) {
+			settingsDirectory = new File(System.getProperty("user.home") + "/.config/fancy-file-server");
 		} else {
-			settingsDirectory = new File(System.getProperty("user.home"), ".fancy-file-server");
+			settingsDirectory = new File(System.getProperty("user.home") + File.separator + ".fancy-file-server");
 		}
 
-		loadStyleResource("default.css");
+		loadStyleSheetResource("default.css");
 	}
 
 	public static Locale getLocale() {
@@ -79,7 +78,11 @@ public class Settings {
 
 		if (returnDefault) {
 			if (propertyName.equals("server_port")) {
-				propertyValue = 80;
+				if (isWindows()) {
+					propertyValue = 80;
+				} else {
+					propertyValue = 8080;
+				}
 			}
 		}
 
@@ -90,7 +93,7 @@ public class Settings {
 		return stylesheet;
 	}
 
-	public static void loadStyle(File file) {
+	public static void loadStyleSheet(File file) {
 		try {
 			FileReader fr = new FileReader(file);
 			BufferedReader in = new BufferedReader(fr);
@@ -110,7 +113,7 @@ public class Settings {
 		}
 	}
 
-	public static void loadStyleResource(String fileName) {
+	public static void loadStyleSheetResource(String fileName) {
 		try {
 			InputStream is = Settings.class.getResourceAsStream("/eu/knapsu/css/" + fileName);
 			if (is != null) {
@@ -133,24 +136,27 @@ public class Settings {
 	public static void loadSettings() {
 		try {
 			properties.load(new FileInputStream(settingsDirectory.getAbsolutePath() + File.separator + "settings"));
-			System.out.println("Ustawienia wczytane");
+			System.out.println(Messages.getString("settings_loaded"));
 		} catch (FileNotFoundException e) {
-			System.out.println("Ustawienia nie zostały wczytane");
+			System.out.println(Messages.getString("settings_not_loaded"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public static void saveSettings() {
+		if (properties.size() == 0) {
+			return;
+		}
 		try {
 			if (settingsDirectory.exists() || settingsDirectory.mkdirs()) {
 				properties.store(new FileOutputStream(settingsDirectory.getAbsolutePath() + File.separator + "settings"), null);
-				System.out.println("Ustawienia zapisane");
+				System.out.println(Messages.getString("settings_saved"));
 			} else {
-				System.out.println("Ustawienia nie zostały zapisane");
+				System.out.println(Messages.getString("settings_not_saved"));
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("Ustawienia nie zostały zapisane");
+			System.out.println(Messages.getString("settings_not_saved"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -158,6 +164,18 @@ public class Settings {
 
 	public static void setProperty(String properyName, Object propertyValue) {
 		properties.setProperty(properyName, String.valueOf(propertyValue));
+	}
+
+	private static boolean isLinux() {
+		return System.getProperty("os.name").contains("Linux");
+	}
+
+	private static boolean isOSX() {
+		return System.getProperty("os.name").contains("OS X");
+	}
+
+	private static boolean isWindows() {
+		return System.getProperty("os.name").startsWith("Windows");
 	}
 
 }
