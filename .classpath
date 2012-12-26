@@ -2,7 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/swt-3.6-linux.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/swt-3.7.2-linux.jar"/>
+	<classpathentry kind="lib" path="lib/swt-3.7.2-windows.jar"/>
+	<classpathentry kind="lib" path="lib/swt-3.7.2-macosx.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
