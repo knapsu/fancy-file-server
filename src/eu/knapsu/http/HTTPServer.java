@@ -116,9 +116,9 @@ public class HTTPServer extends Thread {
 				HttpService service = new HttpService(
 						processor, 
 						new DefaultConnectionReuseStrategy(), 
-						new DefaultHttpResponseFactory());
-				service.setParams(this.parameters);
-				service.setHandlerResolver(registry);
+						new DefaultHttpResponseFactory(),
+						registry,
+						this.parameters);
 
 				/** Start worker thread */
 				WorkerThread t = new WorkerThread(this, service, connection);

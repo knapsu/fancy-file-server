@@ -2,19 +2,16 @@
 <project name="Fancy File Server">
 
 	<loadfile property="app.version" srcfile="version.txt" />
-	<property name="app.httpcore.version" value="4.2.2" />
-	<property name="app.swt.version" value="3.7.2" />
-
 	<loadproperties srcfile="build.properties" />
 
 	<target name="clean">
-		<delete dir="target" />
+		<delete dir="build" />
 	</target>
 
 	<target name="compile">
 		<description>Compile sources</description>
-		<mkdir dir="target/classes" />
-		<javac srcdir="src" destdir="target/classes" source="1.6" target="1.6" includeantruntime="false">
+		<mkdir dir="build/classes" />
+		<javac srcdir="src" destdir="build/classes" source="1.6" target="1.6" includeantruntime="false">
 			<classpath>
 				<fileset dir="lib" />
 			</classpath>
@@ -23,21 +20,21 @@
 
 	<target name="jar" depends="compile">
 		<description>Create runnable JAR with Jar-in-Jar Loader</description>
-		<jar destfile="target/jars/fancy-file-server-${app.version}-${system}${arch}.jar">
+		<jar destfile="build/jars/fancy-file-server-${app.version}-${system}-${arch}.jar">
 			<manifest>
 				<attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
 				<attribute name="Rsrc-Main-Class" value="eu.knapsu.FancyFileServer" />
 				<attribute name="Class-Path" value="." />
-				<attribute name="Rsrc-Class-Path" value="./ httpcore-${app.httpcore.version}.jar swt-${app.swt.version}-${system}${arch}.jar" />
+				<attribute name="Rsrc-Class-Path" value="./ httpcore-${app.httpcore.version}.jar swt-${app.swt.version}-${system}-${arch}.jar" />
 				<attribute name="App-Name" value="${ant.project.name}" />
 				<attribute name="App-Version" value="${app.version}" />
 				<attribute name="App-License" value="GNU General Public License" />
 			</manifest>
 			<zipfileset src="res/jar-in-jar-loader.zip" />
-			<fileset dir="target/classes" />
+			<fileset dir="build/classes" />
 			<fileset dir="src" excludes="**/*.java" />
 			<zipfileset dir="lib" includes="httpcore-${app.httpcore.version}.jar" />
-			<zipfileset dir="lib" includes="swt-${app.swt.version}-${system}${arch}.jar" />
+			<zipfileset dir="lib" includes="swt-${app.swt.version}-${system}-${arch}.jar" />
 			<fileset file="version.txt" />
 			<fileset file="license.txt" />
 		</jar>
@@ -46,21 +43,29 @@
 	<target name="jar-linux">
 		<antcall target="jar">
 			<param name="system" value="linux" />
-			<param name="arch" value="" />
+			<param name="arch" value="32bit" />
+		</antcall>
+		<antcall target="jar">
+			<param name="system" value="linux" />
+			<param name="arch" value="64bit" />
 		</antcall>
 	</target>
 
 	<target name="jar-macosx">
 		<antcall target="jar">
 			<param name="system" value="macosx" />
-			<param name="arch" value="" />
+			<param name="arch" value="64bit" />
 		</antcall>
 	</target>
 
 	<target name="jar-windows">
 		<antcall target="jar">
 			<param name="system" value="windows" />
-			<param name="arch" value="" />
+			<param name="arch" value="32bit" />
+		</antcall>
+		<antcall target="jar">
+			<param name="system" value="windows" />
+			<param name="arch" value="64bit" />
 		</antcall>
 	</target>
 
@@ -75,59 +80,71 @@
 
 	<target name="build-linux">
 		<antcall target="package-linux">
-			<param name="platform" value="32bit" />
+			<param name="arch" value="32bit" />
+		</antcall>
+		<antcall target="package-linux">
+			<param name="arch" value="64bit" />
 		</antcall>
 	</target>
 
 	<target name="package-linux" depends="jar-linux">
-		<copy todir="target/linux/${platform}">
-			<fileset dir="res/linux" />
+		<copy todir="build/linux-${arch}">
+			<fileset dir="res/linux/${arch}" />
 		</copy>
-		<copy file="target/jars/fancy-file-server-${app.version}-linux.jar" tofile="target/linux/${platform}/fancy-file-server.jar" />
-		<zip destfile="target/Fancy_File_Server_${app.version}_Linux_${platform}.zip" whenempty="fail">
-			<zipfileset dir="target/linux/${platform}">
+		<copy file="build/jars/fancy-file-server-${app.version}-linux-${arch}.jar" tofile="build/linux-${arch}/fancy-file-server.jar" />
+		<zip destfile="build/Fancy_File_Server_${app.version}_Linux_${arch}.zip" whenempty="fail">
+			<zipfileset dir="build/linux-${arch}">
 				<exclude name="**/*.sh" />
 			</zipfileset>
-			<zipfileset dir="target/linux/${platform}" filemode="755">
+			<zipfileset dir="build/linux-${arch}" filemode="755">
 				<include name="**/*.sh" />
 			</zipfileset>
 		</zip>
+		<delete dir="build/linux-${arch}" />
 	</target>
 
 	<target name="build-macosx">
 		<antcall target="package-macosx">
-			<param name="platform" value="32bit" />
+			<param name="arch" value="64bit" />
 		</antcall>
 	</target>
 
 	<target name="package-macosx" depends="jar-macosx">
-		<copy todir="target/macosx/${platform}">
+		<copy todir="build/macosx-${arch}">
 			<fileset dir="res/macosx" />
 		</copy>
 		<property name="macosx.content" value="Fancy File Server.app/Contents/MacOS" />
-		<copy file="target/jars/fancy-file-server-${app.version}-macosx.jar" tofile="target/macosx/${platform}/${macosx.content}/fancy-file-server.jar" />
-		<zip destfile="target/Fancy_File_Server_${app.version}_Mac_${platform}.zip" whenempty="fail">
-			<zipfileset dir="target/macosx/${platform}">
+		<copy file="build/jars/fancy-file-server-${app.version}-macosx-${arch}.jar" tofile="build/macosx-${arch}/${macosx.content}/fancy-file-server.jar" />
+		<zip destfile="build/Fancy_File_Server_${app.version}_OSX_${arch}.zip" whenempty="fail">
+			<zipfileset dir="build/macosx-${arch}">
 				<exclude name="${macosx.content}/fancy-file-server" />
 			</zipfileset>
-			<zipfileset dir="target/macosx/${platform}" filemode="755">
+			<zipfileset dir="build/macosx-${arch}" filemode="755">
 				<include name="${macosx.content}/fancy-file-server" />
 			</zipfileset>
 		</zip>
+		<delete dir="build/macosx-${arch}" />
 	</target>
 
 	<target name="build-windows" depends="jar-windows">
-		<mkdir dir="target/windows/32bit" />
-		<launch4j configFile="res/windows/launch4j.xml" jar="target/jars/fancy-file-server-${app.version}-windows.jar" outfile="target/windows/32bit/Fancy File Server.exe" />
+		<mkdir dir="build/windows-32bit" />
+		<launch4j configFile="res/windows/launch4j/launch4j-32bit.xml" jar="build/jars/fancy-file-server-${app.version}-windows-32bit.jar" outfile="build/windows-32bit/Fancy File Server.exe" />
 		<antcall target="package-windows">
-			<param name="platform" value="32bit" />
+			<param name="arch" value="32bit" />
+		</antcall>
+		
+		<mkdir dir="build/windows-64bit" />
+		<launch4j configFile="res/windows/launch4j/launch4j-64bit.xml" jar="build/jars/fancy-file-server-${app.version}-windows-64bit.jar" outfile="build/windows-64bit/Fancy File Server.exe" />
+		<antcall target="package-windows">
+			<param name="arch" value="64bit" />
 		</antcall>
 	</target>
 
 	<target name="package-windows">
-		<zip destfile="target/Fancy_File_Server_${app.version}_Windows_${platform}.zip" whenempty="fail">
-			<zipfileset dir="target/windows/${platform}" />
+		<zip destfile="build/Fancy_File_Server_${app.version}_Windows_${arch}.zip" whenempty="fail">
+			<zipfileset dir="build/windows-${arch}" />
 		</zip>
+		<delete dir="build/windows-${arch}" />
 	</target>
 
 	<target name="build-all">

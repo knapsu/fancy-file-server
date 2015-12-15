@@ -103,7 +103,7 @@ public class FileHandler implements HttpRequestHandler  {
 				body.setContentType("text/html; charset=UTF-8");
 				response.setEntity(body);
 			} else {
-				FileEntity body = new FileEntity(((LocalFile) file).getFile(), "application/octet-stream");
+				FileEntity body = new FileEntity(((LocalFile) file).getFile(), ContentType.APPLICATION_OCTET_STREAM);
 				response.setEntity(body);
 			}
 
