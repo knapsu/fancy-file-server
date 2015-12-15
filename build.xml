@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project name="Fancy File Server">
 
-	<loadfile property="app.version" srcfile="version.txt" />
+	<loadfile property="app.version" srcfile="VERSION" />
 	<loadproperties srcfile="build.properties" />
 
 	<target name="clean">
@@ -28,15 +28,13 @@
 				<attribute name="Rsrc-Class-Path" value="./ httpcore-${app.httpcore.version}.jar swt-${app.swt.version}-${system}-${arch}.jar" />
 				<attribute name="App-Name" value="${ant.project.name}" />
 				<attribute name="App-Version" value="${app.version}" />
-				<attribute name="App-License" value="GNU General Public License" />
+				<attribute name="App-License" value="GNU General Public License v3" />
 			</manifest>
 			<zipfileset src="res/jar-in-jar-loader.zip" />
 			<fileset dir="build/classes" />
 			<fileset dir="src" excludes="**/*.java" />
 			<zipfileset dir="lib" includes="httpcore-${app.httpcore.version}.jar" />
 			<zipfileset dir="lib" includes="swt-${app.swt.version}-${system}-${arch}.jar" />
-			<fileset file="version.txt" />
-			<fileset file="license.txt" />
 		</jar>
 	</target>
 
